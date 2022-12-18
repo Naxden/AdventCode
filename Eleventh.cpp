@@ -1,33 +1,34 @@
 #include "includes.hpp"
 #include <functional>
-#include <bignum.h>
-
-
 
 class Monkey
 {
 private:
-    std::function<bignum (bignum)> operation;
-    bignum divisble;
+    std::function<long long (long long)> operation;
+    int divisble;
     int trueMonkey, falseMonkey;
 public:
-    void itemOperation(vector<bignum>::iterator itemIter);
-    vector<bignum> worriedItems;
-    unsigned int inspectedItems = 0;
-    
+    void itemOperation(vector<long long>::iterator itemIter);
+    vector<long long> worriedItems;
+    int inspectedItems = 0;
+    int GetDivisible() {return divisble;}
     Monkey() = default;
-    Monkey(vector<bignum> items, std::function<bignum (bignum)> funcOperation, bignum test, int trueMonkey, int negMonkey) :
+    Monkey(vector<long long> items, std::function<long long (long long)> funcOperation, int test, int trueMonkey, int negMonkey) :
         worriedItems(items), operation(funcOperation), divisble(test), trueMonkey(trueMonkey), falseMonkey(negMonkey) {}
     ~Monkey() = default;
 };
 
-Monkey monkeys[4];
+const int MONKEY_COUNT = 8;
+Monkey monkeys[MONKEY_COUNT];
+static int allDivisible = 1;
 
-void Monkey::itemOperation(vector<bignum>::iterator itemIter)
+void Monkey::itemOperation(vector<long long>::iterator itemIter)
 {
     *itemIter = operation(*itemIter);
-
+    // part 1
     // *itemIter /= 3;
+    // part 2
+    *itemIter %= allDivisible;
 
     int correctMonkey = (*itemIter % divisble == 0) ? trueMonkey : falseMonkey; 
 
@@ -38,14 +39,22 @@ void Monkey::itemOperation(vector<bignum>::iterator itemIter)
 int main()
 {
 
-    monkeys[0] = Monkey({79, 98}, [](bignum old) { return old * 19; }, 23, 2, 3);
-    monkeys[1] = Monkey({54, 65, 75, 74}, [](bignum old) { return old + 6; }, 19, 2, 0);
-    monkeys[2] = Monkey({79, 60, 97}, [](bignum old) { return old * old; }, 13, 1, 3);
-    monkeys[3] = Monkey({74}, [](bignum old) { return old + 3; }, 17, 0, 1);
-
-    for (int round = 0; round < 20; round++)
+    monkeys[0] = Monkey({63, 57}, [](long long old) { return old * 11; }, 7, 6, 2);
+    monkeys[1] = Monkey({82, 66, 87, 78, 77, 92, 83}, [](long long old) { return old + 1; }, 11, 5, 0);
+    monkeys[2] = Monkey({97, 53, 53, 85, 58, 54}, [](long long old) { return old * 7; }, 13, 4, 3);
+    monkeys[3] = Monkey({50}, [](long long old) { return old + 3; }, 3, 1, 7);
+    monkeys[4] = Monkey({64, 69, 52, 65, 73}, [](long long old) { return old + 6; }, 17, 3, 7);
+    monkeys[5] = Monkey({57, 91, 65}, [](long long old) { return old + 5; }, 2, 0, 6);
+    monkeys[6] = Monkey({67, 91, 84, 78, 60, 69, 99, 83}, [](long long old) { return old * old; }, 5, 2, 4);
+    monkeys[7] = Monkey({58, 78, 69, 65}, [](long long old) { return old + 7; }, 19, 5, 1);
+    for (int i = 0; i < MONKEY_COUNT; i++)
     {
-        for (int i = 0; i < 4; i++)
+        allDivisible *= monkeys[i].GetDivisible();
+    }
+
+    for (int round = 0; round < 10000; round++)
+    {
+        for (int i = 0; i < MONKEY_COUNT; i++)
         {
             for (auto item = monkeys[i].worriedItems.begin(); item != monkeys[i].worriedItems.end(); item++)
             {
@@ -53,19 +62,9 @@ int main()
             }
             monkeys[i].worriedItems.clear();
         }
-        // cout << "After round " << round + 1 << ", the monkeys are holding items with these worry levels:" << endl;
-        // for (int i = 0; i < 4; i++)
-        // {
-        //     cout << "Monkey " << i << ": ";
-        //     for (auto item : monkeys[i].worriedItems)
-        //     {
-        //         cout << item.to_string() << ", ";
-        //     }
-        //     cout << endl;
-        // }
     }
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < MONKEY_COUNT; i++)
     {
         cout << "Monkey " << i << ": " << monkeys[i].inspectedItems << endl;
     }
